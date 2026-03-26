@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: fraud-rag-system
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/fraud_rag_db
+    username: postgres
+    password: postgres
+
+  ai:
+    model:
+      embedding:
+        text: vertexai
+
+    vertex:
+      ai:
+        embedding:
+          project-id: gd-gcp-internship-ui
+          location: us-central1
+
+logging:
+  level:
+    com.project.fraudsystem: DEBUG
+    org.springframework.ai: DEBUG

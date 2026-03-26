@@ -1,0 +1,47 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+
+# Eclipse / STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+# Mac
+.DS_Store
+
+# Logs
+*.log
+
+# Environment files
+.env
+*.env
+
+#
+# GCP credentials (VERY IMPORTANT)
+*.json
+!postman/*.json
+
+# OS temp
+Thumbs.db
