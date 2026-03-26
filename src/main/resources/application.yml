@@ -14,12 +14,24 @@ spring:
     model:
       embedding:
         text: vertexai
+      chat: vertexai
 
     vertex:
       ai:
         embedding:
           project-id: gd-gcp-internship-ui
           location: us-central1
+          text:
+            options:
+              model: text-embedding-004
+
+        gemini:
+          project-id: gd-gcp-internship-ui
+          location: us-central1
+          chat:
+            options:
+              model: gemini-2.5-flash
+              temperature: 0.2
 
 logging:
   level:

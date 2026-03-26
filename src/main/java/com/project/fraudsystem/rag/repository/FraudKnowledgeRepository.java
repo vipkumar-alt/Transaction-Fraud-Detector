@@ -71,7 +71,7 @@ public class FraudKnowledgeRepository {
             SELECT id, title, content, category, risk_level
             FROM fraud_knowledge
             WHERE embedding IS NOT NULL
-            ORDER BY embedding <-> CAST(? AS vector)
+            ORDER BY embedding <=> CAST(? AS vector)
             LIMIT 3
             """;
 
