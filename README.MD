@@ -1,80 +1,110 @@
-# 📌 Fraud Detection RAG System
+# 📌 Fraud Detection RAG + LLM System
 
-A **Retrieval-Augmented Generation (RAG)** based fraud detection system that uses **semantic search with embeddings** to identify relevant fraud patterns and generate intelligent insights.
+A **production-grade Retrieval-Augmented Generation (RAG) system** for fraud detection that combines:
+
+* **Semantic search (embeddings)**
+* **Vector database (pgvector)**
+* **LLM reasoning (Gemini)**
+* **Explainable AI outputs**
 
 ---
 
 # 🚀 Project Overview
 
-This project implements a **fraud detection system** using:
+This system detects fraud by combining **retrieval + reasoning** instead of static rules.
 
-- **Spring Boot** (backend)
-- **PostgreSQL + pgvector** (vector database)
-- **Google Vertex AI Embeddings** (`text-embedding-004`)
-- **RAG architecture** for intelligent retrieval
+### 🔥 Key Idea
 
-Instead of relying only on static rules, the system:
+Instead of hardcoding fraud rules:
 
-1. Converts transaction data into a semantic query
-2. Generates embeddings using Vertex AI
-3. Performs vector similarity search in PostgreSQL
-4. Retrieves relevant fraud knowledge
+1. Convert transaction → semantic query
+2. Retrieve relevant fraud knowledge (RAG)
+3. Use LLM (Gemini) to explain risk + action
 
 ---
 
-# 🧠 Architecture
+# 🧠 Full Architecture
 
-
+```
 Transaction Input
-↓
+        ↓
 Query Builder
-↓
-Embedding (Vertex AI)
-↓
-Vector Search (pgvector)
-↓
-Relevant Fraud Knowledge
-
+        ↓
+Embedding Model (Vertex AI)
+        ↓
+Vector Search (pgvector - Cosine Similarity)
+        ↓
+Top-K Fraud Knowledge Chunks
+        ↓
+Prompt Builder
+        ↓
+Gemini LLM (Reasoning Layer)
+        ↓
+Final Output (Explanation + Risk + Action)
+```
 
 ---
 
 # 🛠 Tech Stack
 
-| Component | Technology |
-|----------|----------|
-| Backend | Spring Boot |
-| Database | PostgreSQL |
-| Vector DB | pgvector |
-| Embeddings | Google Vertex AI (`text-embedding-004`) |
-| Build Tool | Maven |
-| API Testing | Postman |
-| Containerization | Docker |
+| Component        | Technology                       |
+| ---------------- | -------------------------------- |
+| Backend          | Spring Boot                      |
+| Database         | PostgreSQL                       |
+| Vector DB        | pgvector                         |
+| Embeddings       | Vertex AI (`text-embedding-004`) |
+| LLM              | Gemini (`gemini-2.5-flash`)      |
+| Build Tool       | Maven                            |
+| API Testing      | Postman                          |
+| Containerization | Docker                           |
 
 ---
 
-# 📊 Embedding Model
+# 📊 Models Used
 
-- Model: `text-embedding-004`
-- Provider: Google Vertex AI
-- Dimensions: **768**
-- Purpose: Semantic similarity search
+## 🔹 Embedding Model
+
+* **Model:** `text-embedding-004`
+* **Dimensions:** 768
+* **Purpose:** Convert text → vector
+
+## 🔹 LLM Model
+
+* **Model:** `gemini-2.5-flash`
+* **Purpose:** Explanation + decision making
+
+---
+
+# 🔍 Similarity Search (Important)
+
+We use:
+
+```sql
+ORDER BY embedding <=> query_vector
+```
+
+### ✅ Metric: Cosine Similarity
+
+| Metric  | Meaning               |
+| ------- | --------------------- |
+| Cosine  | Angle between vectors |
+| Focus   | Semantic meaning      |
+| Benefit | Better relevance      |
+
+👉 Previously used Euclidean (`<->`), upgraded to cosine (`<=>`) for better results.
 
 ---
 
 # 📁 Project Structure
 
-
+```
 fraud-rag-system/
 ├── src/
-├── db/
-│ ├── schema.sql
-│ └── seed.sql
-├── postman/
 ├── docker-compose.yml
 ├── pom.xml
 ├── README.md
 └── .gitignore
-
+```
 
 ---
 
@@ -84,16 +114,22 @@ fraud-rag-system/
 
 ```bash
 docker-compose up -d
-
-Check if running:
-
 docker ps
-2️⃣ Connect to Database
+```
+
+---
+
+## 2️⃣ Connect to Database
+
+```bash
 psql -h localhost -p 5433 -U postgres -d fraud_rag_db
-3️⃣ Create Table
+```
 
-Run:
+---
 
+## 3️⃣ Create Table
+
+```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE fraud_knowledge (
@@ -104,26 +140,51 @@ CREATE TABLE fraud_knowledge (
     risk_level TEXT,
     embedding VECTOR(768)
 );
-4️⃣ Insert Data
+```
 
-Run your seed.sql or insert manually.
+---
 
-Verify:
+## 4️⃣ Insert Data
 
+```sql
 SELECT COUNT(*) FROM fraud_knowledge;
-5️⃣ Start Spring Boot Application
+```
+
+---
+
+## 5️⃣ Start Application
+
+```bash
 mvn spring-boot:run
+```
 
-Or run from IntelliJ.
+---
 
-🔐 Google Cloud Setup (Vertex AI)
-Authenticate
+# 🔐 Google Cloud Setup
+
+## Authenticate
+
+```bash
 gcloud auth application-default login
-Set Project
+```
+
+## Set Project
+
+```bash
 gcloud config set project YOUR_PROJECT_ID
-Set Quota Project
+```
+
+## Set Quota
+
+```bash
 gcloud auth application-default set-quota-project YOUR_PROJECT_ID
-⚙️ application.yml
+```
+
+---
+
+# ⚙️ application.yml
+
+```yaml
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/fraud_rag_db
@@ -131,9 +192,6 @@ spring:
     password: postgres
 
   ai:
-    model:
-      embedding:
-        text: vertexai
     vertex:
       ai:
         embedding:
@@ -142,17 +200,44 @@ spring:
           text:
             options:
               model: text-embedding-004
-🔌 API Endpoints
-1️⃣ Get All Knowledge
+    model:
+      embedding:
+        text: vertexai
+```
+
+---
+
+# 🔌 API Endpoints
+
+## 1️⃣ Get All Knowledge
+
+```
 GET /api/rag/knowledge/all
-2️⃣ Generate Embeddings
+```
+
+---
+
+## 2️⃣ Generate Embeddings
+
+```
 POST /api/rag/knowledge/embed
+```
 
-👉 This generates embeddings for all rows.
+👉 Generates embeddings for all rows.
 
-3️⃣ Query RAG System
+---
+
+## 3️⃣ Fraud Detection (Main API)
+
+```
 POST /api/rag/query
-Example Request
+```
+
+---
+
+# 📥 Example Request
+
+```json
 {
   "amount": 4500,
   "merchantCategory": "crypto exchange",
@@ -163,57 +248,97 @@ Example Request
   "accountAgeDays": 15,
   "transactionsLast24h": 8
 }
-Example Response
+```
+
+---
+
+# 📤 Example Response
+
+```json
 {
   "query": "high value international new device crypto exchange",
-  "retrievedContents": [
-    "Transactions above 3000 involving crypto exchange merchants are high risk...",
-    "Crypto exchanges are considered high-risk merchants..."
-  ]
+  "retrievedTitles": [
+    "High Value Crypto Purchase",
+    "High Risk Merchant Category Crypto"
+  ],
+  "explanation": "The transaction involves a crypto exchange and a high amount from a new device...",
+  "riskLevel": "HIGH",
+  "recommendedAction": "REVIEW"
 }
-🧪 Testing with Postman
-Open Postman
-Create requests for:
-/api/rag/knowledge/embed
-/api/rag/query
-Send JSON body for query endpoint
-🔍 Key Concepts
-Semantic Search
+```
 
-Instead of keyword matching:
+---
 
-"crypto fraud" ≠ "bitcoin scam" ❌
+# 🔍 Key Concepts
+
+## ✅ Semantic Search
+
+Traditional:
+
+```
+crypto fraud ≠ bitcoin scam
+```
 
 With embeddings:
 
-"crypto fraud" ≈ "bitcoin scam" ✅
-Vector Similarity
+```
+crypto fraud ≈ bitcoin scam
+```
 
-PostgreSQL uses:
+---
 
-ORDER BY embedding <-> query_vector
-<-> = Euclidean distance
-Smaller distance = more similar
-✅ Features Implemented
-✅ Fraud knowledge storage
-✅ Vector embeddings (Vertex AI)
-✅ pgvector similarity search
-✅ RAG retrieval pipeline
-✅ REST APIs for interaction
-🚧 Future Improvements
-Add LLM explanation layer (Gemini)
-Return risk score + decision
-Improve ranking (cosine similarity)
-Add larger dataset
-Add UI dashboard
-👨‍💻 Author
+## ✅ RAG (Retrieval-Augmented Generation)
 
-Mohit Srivastava
+* Retrieval → fetch relevant knowledge
+* Generation → LLM explains using that knowledge
 
-⭐ Summary
+---
 
-This project demonstrates a production-style RAG system for fraud detection using:
+## ✅ Why Cosine Similarity?
 
-semantic embeddings
-vector databases
-real-world architecture
+* Focuses on **semantic direction**
+* Ignores magnitude
+* Improves retrieval quality
+
+---
+
+# ✅ Features Implemented
+
+* ✅ Fraud knowledge storage
+* ✅ Real embeddings (Vertex AI)
+* ✅ Vector search (pgvector)
+* ✅ Cosine similarity optimization
+* ✅ RAG pipeline
+* ✅ Gemini LLM explanation layer
+* ✅ Risk classification (LOW / MEDIUM / HIGH)
+* ✅ Recommended actions (ALLOW / REVIEW / BLOCK)
+
+---
+
+# 🚧 Future Improvements
+
+* Add ML fraud score (Hybrid AI)
+* Add re-ranking layer
+* Add UI dashboard
+* Add real-time streaming
+* Improve dataset size
+* Add confidence score
+
+---
+
+# 👨‍💻 Author
+
+**Mohit Srivastava**
+
+---
+
+# ⭐ Summary
+
+This project demonstrates a **modern AI system architecture** combining:
+
+* Vector databases
+* Semantic search
+* LLM reasoning
+* Explainable AI
+
+👉 A real-world implementation of **RAG + LLM for fraud detection**
