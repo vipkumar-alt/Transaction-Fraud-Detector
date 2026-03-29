@@ -72,7 +72,7 @@ public class FraudKnowledgeRepository {
             FROM fraud_knowledge
             WHERE embedding IS NOT NULL
             ORDER BY embedding <=> CAST(? AS vector)
-            LIMIT 3
+            LIMIT 5
             """;
 
         return jdbcTemplate.query(
