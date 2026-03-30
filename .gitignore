@@ -1,0 +1,81 @@
+# ------------------------------
+# Python cache / bytecode
+# ------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ------------------------------
+# Virtual environments
+# ------------------------------
+.venv/
+venv/
+env/
+ENV/
+
+# ------------------------------
+# Build / packaging
+# ------------------------------
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# ------------------------------
+# Test / tool caches
+# ------------------------------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ipynb_checkpoints/
+
+# ------------------------------
+# Model training outputs
+# ------------------------------
+artifacts/
+catboost_info/
+
+# ------------------------------
+# Data files (keep folders, ignore contents)
+# ------------------------------
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Optional: if you want to keep tiny sample files, comment the two lines above
+# and use patterns like these instead:
+# data/raw/*.csv
+# data/raw/*.zip
+# data/processed/*.csv
+
+# ------------------------------
+# Notebook outputs / temp files
+# ------------------------------
+notebooks/.ipynb_checkpoints/
+*.log
+
+# ------------------------------
+# OS / editor files
+# ------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ------------------------------
+# Environment / local config
+# ------------------------------
+.env
+.env.*
+.python-version
+
+# ------------------------------
+# Mac / Linux misc
+# ------------------------------
+*.swp
+*.swo
