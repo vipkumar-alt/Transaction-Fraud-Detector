@@ -1,1 +1,70 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  color-scheme: light;
+  --bg: #efe5d8;
+  --bg-accent: #f9f2e8;
+  --surface: rgba(255, 248, 240, 0.92);
+  --surface-strong: #fffaf4;
+  --surface-muted: #f4e4d3;
+  --border: rgba(57, 46, 35, 0.14);
+  --border-strong: rgba(57, 46, 35, 0.24);
+  --text: #1f2937;
+  --text-muted: #5f6472;
+  --primary: #b85c38;
+  --primary-strong: #8e4326;
+  --primary-soft: rgba(184, 92, 56, 0.12);
+  --accent: #224b5d;
+  --accent-soft: rgba(34, 75, 93, 0.12);
+  --danger: #b42318;
+  --danger-soft: rgba(180, 35, 24, 0.12);
+  --warning: #b54708;
+  --warning-soft: rgba(181, 71, 8, 0.12);
+  --success: #1f7a59;
+  --success-soft: rgba(31, 122, 89, 0.12);
+  --shadow-xl: 0 34px 80px rgba(82, 51, 29, 0.16);
+  --shadow-lg: 0 24px 52px rgba(82, 51, 29, 0.12);
+  --shadow-md: 0 14px 28px rgba(82, 51, 29, 0.1);
+  --radius-2xl: 34px;
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --font-display: Baskerville, 'Baskerville Old Face', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --font-body: 'Trebuchet MS', 'Segoe UI', 'Helvetica Neue', sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--text);
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(circle at top left, rgba(184, 92, 56, 0.18), transparent 24%),
+    radial-gradient(circle at top right, rgba(34, 75, 93, 0.15), transparent 22%),
+    linear-gradient(180deg, #fbf5ee 0%, #efe5d8 52%, #e6d7c5 100%);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}

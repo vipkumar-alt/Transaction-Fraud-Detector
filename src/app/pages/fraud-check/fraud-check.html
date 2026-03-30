@@ -1,0 +1,202 @@
+<div class="page-container">
+  <section class="hero-copy">
+    <p class="eyebrow">Fraud Check</p>
+    <h2>Run a fast transaction review for your demo scenario</h2>
+  </section>
+
+  <div class="content-grid">
+    <section class="card form-card">
+      <div class="section-heading">
+        <div>
+          <h3>Transaction Input</h3>
+        </div>
+      </div>
+
+      <div class="required-note">
+        <span class="required-dot">*</span>
+        <span>Marks a required field</span>
+      </div>
+
+      <form #fraudForm="ngForm" class="transaction-form" novalidate (ngSubmit)="submitForm(fraudForm)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="amount">Amount <span class="required-mark">*</span></label>
+            <input
+              id="amount"
+              type="number"
+              [(ngModel)]="formData.amount"
+              name="amount"
+              min="0.01"
+              required
+              [class.invalid-input]="showFieldError('amount')"
+            />
+            <small *ngIf="showFieldError('amount')" class="field-error">{{ getFieldError('amount') }}</small>
+          </div>
+
+          <div class="form-group">
+            <label for="merchantCategory">Merchant Category <span class="required-mark">*</span></label>
+            <input
+              id="merchantCategory"
+              type="text"
+              [(ngModel)]="formData.merchantCategory"
+              name="merchantCategory"
+              placeholder="electronics"
+              required
+              [class.invalid-input]="showFieldError('merchantCategory')"
+            />
+            <small *ngIf="showFieldError('merchantCategory')" class="field-error">{{ getFieldError('merchantCategory') }}</small>
+          </div>
+
+          <div class="form-group">
+            <label for="deviceType">Device Type <span class="required-mark">*</span></label>
+            <input
+              id="deviceType"
+              type="text"
+              [(ngModel)]="formData.deviceType"
+              name="deviceType"
+              placeholder="mobile"
+              required
+              [class.invalid-input]="showFieldError('deviceType')"
+            />
+            <small *ngIf="showFieldError('deviceType')" class="field-error">{{ getFieldError('deviceType') }}</small>
+          </div>
+
+          <div class="form-group">
+            <label for="transactionTime">Transaction Time <span class="required-mark">*</span></label>
+            <input
+              id="transactionTime"
+              type="text"
+              [(ngModel)]="formData.transactionTime"
+              name="transactionTime"
+              placeholder="02:30"
+              required
+              [class.invalid-input]="showFieldError('transactionTime')"
+            />
+            <small *ngIf="showFieldError('transactionTime')" class="field-error">{{ getFieldError('transactionTime') }}</small>
+          </div>
+
+          <div class="form-group">
+            <label for="accountAgeDays">Account Age Days <span class="required-mark">*</span></label>
+            <input
+              id="accountAgeDays"
+              type="number"
+              [(ngModel)]="formData.accountAgeDays"
+              name="accountAgeDays"
+              min="0"
+              required
+              [class.invalid-input]="showFieldError('accountAgeDays')"
+            />
+            <small *ngIf="showFieldError('accountAgeDays')" class="field-error">{{ getFieldError('accountAgeDays') }}</small>
+          </div>
+
+          <div class="form-group">
+            <label for="transactionsLast24h">Transactions Last 24h <span class="required-mark">*</span></label>
+            <input
+              id="transactionsLast24h"
+              type="number"
+              [(ngModel)]="formData.transactionsLast24h"
+              name="transactionsLast24h"
+              min="0"
+              required
+              [class.invalid-input]="showFieldError('transactionsLast24h')"
+            />
+            <small *ngIf="showFieldError('transactionsLast24h')" class="field-error">{{ getFieldError('transactionsLast24h') }}</small>
+          </div>
+        </div>
+
+        <div *ngIf="validationError" class="validation-banner">
+          <p>{{ validationError }}</p>
+          <ul *ngIf="getValidationIssues().length > 1" class="validation-list">
+            <li *ngFor="let issue of getValidationIssues()">{{ issue }}</li>
+          </ul>
+        </div>
+
+        <div class="toggle-row">
+          <label class="toggle-card">
+            <input type="checkbox" [(ngModel)]="formData.newDevice" name="newDevice" />
+            <span>
+              <strong>New Device</strong>
+              <small>Flag first-time device usage</small>
+            </span>
+          </label>
+
+          <label class="toggle-card">
+            <input type="checkbox" [(ngModel)]="formData.international" name="international" />
+            <span>
+              <strong>International</strong>
+              <small>Mark cross-border activity</small>
+            </span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="loading">
+            {{ loading ? 'Analyzing...' : 'Analyze Transaction' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card insights-card">
+      <div *ngIf="loading" class="state-card loading-card">
+        <div class="spinner" aria-hidden="true"></div>
+        <div>
+          <h3>Analyzing transaction</h3>
+          <p>Reviewing transaction signals, retrieving context, and generating a recommendation.</p>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="state-card error-card">
+        <h3>Analysis failed</h3>
+        <p>{{ error }}</p>
+      </div>
+
+      <div *ngIf="!loading && !error && !result" class="state-card empty-card">
+        <h3>No results yet</h3>
+        <p>Submit a transaction to see the risk level, suggested action, explanation, and retrieved evidence.</p>
+      </div>
+
+      <div *ngIf="result" class="result-card">
+        <div class="section-heading">
+          <div>
+            <h3>Fraud Analysis Result</h3>
+            <p>Use this summary card as the main talking point in your presentation.</p>
+          </div>
+          <span class="risk-pill" [ngClass]="getRiskTone(result.riskLevel)">{{ result.riskLevel }}</span>
+        </div>
+
+        <div class="result-metrics">
+          <div class="metric-card">
+            <span class="metric-label">Recommended Action</span>
+            <strong>{{ result.recommendedAction }}</strong>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Generated Query</span>
+            <strong>{{ result.query }}</strong>
+          </div>
+        </div>
+
+        <div class="narrative-card">
+          <span class="metric-label">Explanation</span>
+          <p>{{ result.explanation }}</p>
+        </div>
+
+        <div class="evidence-grid">
+          <div class="evidence-card">
+            <h4>Retrieved Titles</h4>
+            <ul>
+              <li *ngFor="let title of result.retrievedTitles">{{ title }}</li>
+            </ul>
+          </div>
+
+          <div class="evidence-card">
+            <h4>Retrieved Contents</h4>
+            <ul>
+              <li *ngFor="let content of result.retrievedContents">{{ content }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
