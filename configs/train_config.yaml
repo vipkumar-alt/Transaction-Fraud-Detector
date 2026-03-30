@@ -1,0 +1,28 @@
+project_name: fraud_model_project
+random_seed: 42
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  artifacts_dir: artifacts
+  train_file: fraudTrain.csv
+  holdout_file: fraudTest.csv
+
+split:
+  validation_fraction: 0.15
+
+feature_engineering:
+  rare_category_min_count: 50
+  create_amount_bands: true
+  create_behavioral_features: true
+
+models:
+  train_logistic_regression: false
+  train_random_forest: false
+  train_xgboost: true
+  train_lightgbm: true
+  train_catboost: true
+
+selection:
+  primary_metric: holdout_pr_auc
+  threshold_strategy: f2
