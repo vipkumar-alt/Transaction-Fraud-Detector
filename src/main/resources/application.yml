@@ -7,8 +7,11 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5433/fraud_rag_db
-    username: postgres
-    password: postgres
+#    username: postgres
+#    password: postgres
+
+    username: fraud_user
+    password: fraud_pass
 
   ai:
     model:
