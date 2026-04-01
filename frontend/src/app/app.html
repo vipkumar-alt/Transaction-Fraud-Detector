@@ -1,0 +1,19 @@
+<div class="app-shell">
+  <header class="app-header">
+    <div class="brand-block">
+      <h1>Fraud Detection & Audit Console</h1>
+      <p class="subtitle">
+        Review a transaction, inspect the model recommendation, and browse recent audit activity in one place.
+      </p>
+    </div>
+
+    <nav class="navbar" aria-label="Primary">
+      <a routerLink="/fraud-check" routerLinkActive="active-link">Fraud Check</a>
+      <a routerLink="/audit-logs" routerLinkActive="active-link">Audit Logs</a>
+    </nav>
+  </header>
+
+  <main class="page-frame">
+    <router-outlet></router-outlet>
+  </main>
+</div>
