@@ -7,6 +7,7 @@ public class FraudKnowledgeChunk {
     private String content;
     private String category;
     private String riskLevel;
+    private Double distance;
 
     public FraudKnowledgeChunk() {
     }
@@ -57,5 +58,13 @@ public class FraudKnowledgeChunk {
 
     public void setRiskLevel(String riskLevel) {
         this.riskLevel = riskLevel;
+    }
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
     }
 }

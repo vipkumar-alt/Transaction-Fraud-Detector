@@ -4,6 +4,10 @@ import numpy as np
 import pandas as pd
 
 
+def _flatten_result(values) -> np.ndarray:
+    return np.asarray(values).reshape(-1)
+
+
 def _rolling_stat_by_card(df: pd.DataFrame, window: str, stat: str) -> np.ndarray:
     subset = df[["cc_num", "trans_date_trans_time", "amt"]]
     res = (
@@ -11,7 +15,7 @@ def _rolling_stat_by_card(df: pd.DataFrame, window: str, stat: str) -> np.ndarra
         .apply(lambda g: getattr(g.rolling(window, on="trans_date_trans_time")["amt"], stat)())
         .to_numpy()
     )
-    return res
+    return _flatten_result(res)
 
 
 def _rolling_count_by_card_merchant(df: pd.DataFrame, window: str, key: str) -> np.ndarray:
@@ -21,7 +25,7 @@ def _rolling_count_by_card_merchant(df: pd.DataFrame, window: str, key: str) -> 
         .apply(lambda g: g.rolling(window, on="trans_date_trans_time")["amt"].count())
         .to_numpy()
     )
-    return res
+    return _flatten_result(res)
 
 
 def add_behavioral_features(df: pd.DataFrame) -> pd.DataFrame:

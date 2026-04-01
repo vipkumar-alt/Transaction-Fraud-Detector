@@ -9,6 +9,8 @@ import java.util.List;
 @Repository
 public class FraudKnowledgeRepository {
 
+    private static final int VECTOR_CANDIDATE_LIMIT = 10;
+
     private final JdbcTemplate jdbcTemplate;
 
     public FraudKnowledgeRepository(JdbcTemplate jdbcTemplate) {
@@ -68,24 +70,28 @@ public class FraudKnowledgeRepository {
     public List<FraudKnowledgeChunk> searchByVector(String queryVector) {
 
         String sql = """
-            SELECT id, title, content, category, risk_level
+            SELECT id, title, content, category, risk_level,
+                   embedding <=> CAST(? AS vector) AS distance
             FROM fraud_knowledge
             WHERE embedding IS NOT NULL
             ORDER BY embedding <=> CAST(? AS vector)
-            LIMIT 5
-            """;
+            LIMIT %d
+            """.formatted(VECTOR_CANDIDATE_LIMIT);
 
         return jdbcTemplate.query(
                 sql,
-                new Object[]{queryVector},
-                (rs, rowNum) ->
-                        new FraudKnowledgeChunk(
-                                rs.getInt("id"),
-                                rs.getString("title"),
-                                rs.getString("content"),
-                                rs.getString("category"),
-                                rs.getString("risk_level")
-                        )
+                new Object[]{queryVector, queryVector},
+                (rs, rowNum) -> {
+                    FraudKnowledgeChunk chunk = new FraudKnowledgeChunk(
+                            rs.getInt("id"),
+                            rs.getString("title"),
+                            rs.getString("content"),
+                            rs.getString("category"),
+                            rs.getString("risk_level")
+                    );
+                    chunk.setDistance(rs.getDouble("distance"));
+                    return chunk;
+                }
         );
     }
 }

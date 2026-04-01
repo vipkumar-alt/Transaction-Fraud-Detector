@@ -182,10 +182,13 @@ def run_training(config: TrainConfig) -> None:
 
     metadata = {
         "best_model": best_name,
+        "best_threshold": best_obj["threshold"],
         "feature_columns": feature_cols,
         "categorical_columns": categorical_cols,
         "numeric_columns": numeric_cols,
         "rare_category_mapping": rare_map,
+        "create_amount_bands": config.create_amount_bands,
+        "create_behavioral_features": config.create_behavioral_features,
         "scale_pos_weight": scale_pos_weight,
         "train_rows": len(train_df),
         "valid_rows": len(valid_df),

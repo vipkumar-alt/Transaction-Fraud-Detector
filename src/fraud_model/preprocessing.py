@@ -18,6 +18,14 @@ BASE_CATEGORICAL_COLUMNS = [
     "job",
     "zip",
 ]
+OPTIONAL_NUMERIC_COLUMNS = [
+    "amt",
+    "city_pop",
+    "lat",
+    "long",
+    "merch_lat",
+    "merch_long",
+]
 
 
 def normalize_text(series: pd.Series) -> pd.Series:
@@ -56,12 +64,17 @@ def basic_preprocess(df: pd.DataFrame, create_amount_bands: bool = True) -> pd.D
 
     df = df.sort_values("trans_date_trans_time").reset_index(drop=True)
 
+    for col in OPTIONAL_NUMERIC_COLUMNS:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
     for col in BASE_CATEGORICAL_COLUMNS:
         if col in df.columns:
             df[col] = normalize_text(df[col])
 
     if "zip" in df.columns:
-        df["zip"] = df["zip"].astype("Int64").astype("string").fillna("__missing__")
+        zip_numeric = pd.to_numeric(df["zip"], errors="coerce")
+        df["zip"] = zip_numeric.astype("Int64").astype("string").fillna("__missing__")
 
     if "dob" in df.columns:
         dob = pd.to_datetime(df["dob"], errors="coerce")

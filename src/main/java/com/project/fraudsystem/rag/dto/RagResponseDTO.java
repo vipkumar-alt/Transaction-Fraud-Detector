@@ -7,6 +7,10 @@ public class RagResponseDTO {
     private String query;
     private List<String> retrievedTitles;
     private List<String> retrievedContents;
+    private Double fraudScore;
+    private Double fraudThreshold;
+    private String fraudModelName;
+    private String fraudModelDecision;
     private String explanation;
     private String riskLevel;
     private String recommendedAction;
@@ -33,6 +37,38 @@ public class RagResponseDTO {
 
     public void setRetrievedContents(List<String> retrievedContents) {
         this.retrievedContents = retrievedContents;
+    }
+
+    public Double getFraudScore() {
+        return fraudScore;
+    }
+
+    public void setFraudScore(Double fraudScore) {
+        this.fraudScore = fraudScore;
+    }
+
+    public Double getFraudThreshold() {
+        return fraudThreshold;
+    }
+
+    public void setFraudThreshold(Double fraudThreshold) {
+        this.fraudThreshold = fraudThreshold;
+    }
+
+    public String getFraudModelName() {
+        return fraudModelName;
+    }
+
+    public void setFraudModelName(String fraudModelName) {
+        this.fraudModelName = fraudModelName;
+    }
+
+    public String getFraudModelDecision() {
+        return fraudModelDecision;
+    }
+
+    public void setFraudModelDecision(String fraudModelDecision) {
+        this.fraudModelDecision = fraudModelDecision;
     }
 
     public String getExplanation() {

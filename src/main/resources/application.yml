@@ -37,3 +37,10 @@ logging:
   level:
     com.project.fraudsystem: DEBUG
     org.springframework.ai: DEBUG
+
+fraud:
+  ml:
+    python-executable: ${FRAUD_ML_PYTHON_EXECUTABLE:.venv/bin/python}
+    scoring-script: scripts/score_transaction.py
+    training-config: configs/train_config.yaml
+    timeout-millis: 15000
