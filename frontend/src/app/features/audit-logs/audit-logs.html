@@ -1,0 +1,179 @@
+<div class="page-container">
+  <section class="hero-copy">
+    <p class="eyebrow">Audit Logs</p>
+    <h2>Recent model decisions and system activity</h2>
+    <p>
+      Use this screen to show transaction outcomes, latency, and operational status in a cleaner review table.
+    </p>
+  </section>
+
+  <section *ngIf="logs.length > 0 && !loading && !error" class="summary-strip">
+    <article class="summary-card accent-card">
+      <span class="summary-label">Total Records</span>
+      <strong>{{ logs.length }}</strong>
+      <p>Entries available for walkthrough and QA discussion.</p>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-label">Average Latency</span>
+      <strong>{{ getAverageLatency() }} ms</strong>
+      <p>Quick indicator of backend responsiveness during evaluation.</p>
+    </article>
+  </section>
+
+  <div *ngIf="loading" class="card state-card loading-card">
+    <div class="spinner" aria-hidden="true"></div>
+    <div>
+      <h3>Loading logs</h3>
+      <p>Fetching the latest recorded fraud checks from the backend service.</p>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="card state-card error-card">
+    <h3>Unable to load audit logs</h3>
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="logs.length > 0" class="logs-layout">
+    <div class="card table-card">
+      <div class="section-heading">
+        <div>
+          <h3>Decision History</h3>
+          <p>Select any row to inspect the full explanation and retrieved evidence.</p>
+        </div>
+        <span class="table-hint">Click a row</span>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Amount</th>
+              <th>Merchant</th>
+              <th>Risk</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let log of paginatedLogs"
+              (click)="selectLog(log)"
+              [class.active-row]="selectedLog?.id === log.id"
+              tabindex="0"
+              role="button"
+              (keydown.enter)="selectLog(log)"
+              (keydown.space)="selectLog(log)"
+            >
+              <td class="mono-cell">#{{ log.id }}</td>
+              <td class="amount-cell">{{ log.amount | currency:'INR':'symbol':'1.0-0' }}</td>
+              <td>{{ log.merchantCategory }}</td>
+              <td>
+                <span class="risk-pill" [ngClass]="getRiskTone(log.riskLevel)">{{ log.riskLevel }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-bar">
+        <div class="page-info">
+          Showing {{ getPageStartRecord() }}-{{ getPageEndRecord() }} of {{ logs.length }}
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="page-button"
+            (click)="goToPreviousPage()"
+            [disabled]="currentPage === 1"
+          >
+            Previous
+          </button>
+
+          <button
+            *ngFor="let page of getPageNumbers()"
+            type="button"
+            class="page-button"
+            [class.active-page]="page === currentPage"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            type="button"
+            class="page-button"
+            (click)="goToNextPage()"
+            [disabled]="currentPage === totalPages"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="selectedLog as log" #detailsCard class="card details-card">
+      <div class="section-heading">
+        <div>
+          <h3>Audit Log Details</h3>
+          <p>Selected entry #{{ log.id }} with full reasoning and retrieved evidence.</p>
+        </div>
+        <span class="risk-pill" [ngClass]="getRiskTone(log.riskLevel)">{{ log.riskLevel }}</span>
+      </div>
+
+      <div class="selection-banner">
+        <div>
+          <span class="summary-label">Focused Record</span>
+          <strong>{{ log.merchantCategory }}</strong>
+        </div>
+      </div>
+
+      <div class="detail-metrics">
+        <div class="detail-tile">
+          <span class="tile-label">Recommended Action</span>
+          <strong>{{ log.recommendedAction }}</strong>
+        </div>
+        <div class="detail-tile">
+          <span class="tile-label">Merchant</span>
+          <strong>{{ log.merchantCategory }}</strong>
+        </div>
+        <div class="detail-tile">
+          <span class="tile-label">Latency</span>
+          <strong>{{ log.latencyMs }} ms</strong>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <span class="tile-label">Full Explanation</span>
+        <p>{{ log.explanation || 'No explanation was stored for this audit entry.' }}</p>
+      </div>
+
+      <div class="evidence-grid">
+        <div class="detail-section">
+          <span class="tile-label">Retrieved Titles</span>
+          <ul *ngIf="hasItems(log.retrievedTitles); else noTitles">
+            <li *ngFor="let title of log.retrievedTitles">{{ title }}</li>
+          </ul>
+          <ng-template #noTitles>
+            <p class="muted-message">No retrieved titles were stored for this entry.</p>
+          </ng-template>
+        </div>
+
+        <div class="detail-section">
+          <span class="tile-label">Retrieved Contents</span>
+          <ul *ngIf="hasItems(log.retrievedContents); else noContents">
+            <li *ngFor="let content of log.retrievedContents">{{ content }}</li>
+          </ul>
+          <ng-template #noContents>
+            <p class="muted-message">No retrieved contents were stored for this entry.</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && logs.length === 0 && !error" class="card state-card empty-card">
+    <h3>No audit logs found</h3>
+    <p>Once you run transactions from the Fraud Check page, the latest records will appear here.</p>
+  </div>
+</div>

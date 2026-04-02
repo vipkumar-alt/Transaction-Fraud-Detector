@@ -1,0 +1,167 @@
+<div class="page-container">
+  <section class="hero-copy">
+    <p class="eyebrow">Analytics</p>
+    <h2>Monitor how the hybrid fraud stack is behaving over recent audit activity</h2>
+    <p>
+      This view turns audit-log data into operational signals: decision mix, risk mix, latency profile,
+      and the merchant categories creating the most review load.
+    </p>
+  </section>
+
+  <div *ngIf="loading" class="card state-card loading-card">
+    <div class="spinner" aria-hidden="true"></div>
+    <div>
+      <h3>Loading analytics</h3>
+      <p>Aggregating recent audit entries from the backend service.</p>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="card state-card error-card">
+    <h3>Unable to load analytics</h3>
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="!loading && !error && logs.length > 0" class="analytics-stack">
+    <section class="summary-strip">
+      <article class="summary-card">
+        <span class="summary-label">Review Pressure</span>
+        <strong>{{ reviewPressure }}%</strong>
+        <p>Share of transactions that ended in manual review rather than allow or block.</p>
+      </article>
+
+      <article class="summary-card accent-card">
+        <span class="summary-label">Block Rate</span>
+        <strong>{{ blockRate }}%</strong>
+        <p>Share of transactions that escalated to a blocking outcome.</p>
+      </article>
+    </section>
+
+    <section class="analytics-grid primary-grid">
+      <article class="card analytics-card">
+        <div class="section-heading">
+          <div>
+            <h3>Decision Mix</h3>
+            <p>How the final hybrid action is distributed across the current audit trail.</p>
+          </div>
+        </div>
+
+        <div class="distribution-list">
+          <div *ngFor="let item of recommendationMix" class="distribution-row">
+            <div class="distribution-head">
+              <div>
+                <strong>{{ item.label }}</strong>
+                <p>{{ item.description }}</p>
+              </div>
+              <div class="distribution-meta">
+                <strong>{{ item.count }}</strong>
+                <span>{{ item.percent }}%</span>
+              </div>
+            </div>
+            <div class="distribution-track">
+              <span class="distribution-fill" [ngClass]="item.tone" [style.width.%]="item.percent"></span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card analytics-card">
+        <div class="section-heading">
+          <div>
+            <h3>Risk Mix</h3>
+            <p>Severity distribution coming out of the hybrid reasoning layer.</p>
+          </div>
+        </div>
+
+        <div class="distribution-list">
+          <div *ngFor="let item of riskMix" class="distribution-row">
+            <div class="distribution-head">
+              <div>
+                <strong>{{ item.label }}</strong>
+                <p>{{ item.description }}</p>
+              </div>
+              <div class="distribution-meta">
+                <strong>{{ item.count }}</strong>
+                <span>{{ item.percent }}%</span>
+              </div>
+            </div>
+            <div class="distribution-track">
+              <span class="distribution-fill" [ngClass]="item.tone" [style.width.%]="item.percent"></span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card analytics-card">
+        <div class="section-heading">
+          <div>
+            <h3>Latency Profile</h3>
+            <p>Quick view of how often analyses complete fast, in the expected band, or slowly.</p>
+          </div>
+        </div>
+
+        <div class="distribution-list">
+          <div *ngFor="let item of latencyMix" class="distribution-row">
+            <div class="distribution-head">
+              <div>
+                <strong>{{ item.label }}</strong>
+                <p>{{ item.description }}</p>
+              </div>
+              <div class="distribution-meta">
+                <strong>{{ item.count }}</strong>
+                <span>{{ item.percent }}%</span>
+              </div>
+            </div>
+            <div class="distribution-track">
+              <span class="distribution-fill" [ngClass]="item.tone" [style.width.%]="item.percent"></span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="analytics-grid secondary-grid">
+      <article class="card analytics-card">
+        <div class="section-heading">
+          <div>
+            <h3>Top Merchant Categories</h3>
+            <p>Categories appearing most often in the recorded transaction flow.</p>
+          </div>
+        </div>
+
+        <div class="ranking-list">
+          <div *ngFor="let item of topCategories" class="ranking-row">
+            <div class="ranking-copy">
+              <strong>{{ item.label }}</strong>
+              <span>{{ item.count }} transactions</span>
+            </div>
+            <span class="ranking-share">{{ item.percent }}%</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card analytics-card">
+        <div class="section-heading">
+          <div>
+            <h3>Review Hotspots</h3>
+            <p>Categories creating the most manual-review load in the current dataset.</p>
+          </div>
+        </div>
+
+        <div class="ranking-list">
+          <div *ngFor="let item of reviewHotspots" class="ranking-row">
+            <div class="ranking-copy">
+              <strong>{{ item.label }}</strong>
+              <span>{{ item.count }} review cases</span>
+            </div>
+            <span class="ranking-share">{{ item.percent }}%</span>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <div *ngIf="!loading && logs.length === 0 && !error" class="card state-card empty-card">
+    <h3>No analytics yet</h3>
+    <p>Run some transactions first. Once audit entries exist, this page will summarize the system behavior.</p>
+  </div>
+</div>

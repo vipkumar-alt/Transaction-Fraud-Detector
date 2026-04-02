@@ -5,7 +5,7 @@ import json
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
@@ -20,7 +20,8 @@ def main() -> None:
     args = parser.parse_args()
 
     request = json.load(sys.stdin)
-    config = load_config(args.config)
+    config_path = (PROJECT_ROOT / args.config).resolve() if not Path(args.config).is_absolute() else Path(args.config)
+    config = load_config(config_path)
     result = score_transaction(request, config)
     json.dump(result, sys.stdout)
 

@@ -7,8 +7,12 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5433/fraud_rag_db
-    username: postgres
-    password: postgres
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
 
   ai:
     model:
@@ -41,6 +45,6 @@ logging:
 fraud:
   ml:
     python-executable: ${FRAUD_ML_PYTHON_EXECUTABLE:.venv/bin/python}
-    scoring-script: scripts/score_transaction.py
+    scoring-script: scripts/inference/score_transaction.py
     training-config: configs/train_config.yaml
     timeout-millis: 15000

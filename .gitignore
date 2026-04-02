@@ -1,163 +1,74 @@
-# Maven
+# Java / Maven
 target/
 !.mvn/wrapper/maven-wrapper.jar
 
-# IntelliJ
-.idea/
-*.iws
-*.iml
-*.ipr
-
-# VS Code
-.vscode/
-
-# Eclipse / STS
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-# NetBeans
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-# Python cache / bytecode
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Virtual environments
 .venv/
 venv/
 env/
 ENV/
-
-# Build / packaging
-# Maven
-target/
-!.mvn/wrapper/maven-wrapper.jar
-
-# IntelliJ
-.idea/
-*.iws
-*.iml
-*.ipr
-
-# VS Code
-.vscode/
-
-# Eclipse / STS
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-# NetBeans
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-# Python cache / bytecode
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-.venv/
-venv/
-env/
-ENV/
-
-# Build / packaging
-build/
-dist/
-*.egg-info/
-.eggs/
-pip-wheel-metadata/
-
-# Test / tool caches
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 .coverage.*
 htmlcov/
-.ipynb_checkpoints/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
 
-# Mac
-.DS_Store
-# Model training outputs
-artifacts/
-catboost_info/
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
 
-# Logs
-# Data files
-data/raw/*
-data/processed/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-
-# Notebook checkpoints / temp
-notebooks/.ipynb_checkpoints/
-*.log
-
-# Environment files
-.env
-*.env
-
-#
-# GCP credentials (VERY IMPORTANT)
-*.json
-!postman/*.json
-
-# OS temp
-# OS / editor files
-.DS_Store
-Thumbs.db
-.vscode/
+# IDE / Editor
 .idea/
-
-# Environment / local config
-.env
-.env.*
+.vscode/
+*.iws
+*.iml
+*.ipr
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.apt_generated
 .python-version
 
-# Misc
+# OS / temp
+.DS_Store
+Thumbs.db
 *.swp
 *.swo
 
-# Model training outputs
+# Local environment / secrets
+.env
+.env.*
+*.env
+*.json
+!frontend/angular.json
+!frontend/package.json
+!frontend/package-lock.json
+!frontend/proxy.conf.json
+!frontend/tsconfig.json
+!frontend/tsconfig.app.json
+!frontend/tsconfig.spec.json
+!postman/*.json
+
+# Data / model outputs
 artifacts/
 catboost_info/
-# Mac
-.DS_Store
-# Logs
-# Data files
 data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
-# Notebook checkpoints / temp
+# Logs / notebooks
+*.log
+.ipynb_checkpoints/
 notebooks/.ipynb_checkpoints/
-# Environment files
-.env
-*.env
-
-#
-# GCP credentials (VERY IMPORTANT)
-*.json
-!postman/*.json
-
-# OS temp
-# OS / editor files
-.DS_Store

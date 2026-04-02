@@ -1,6 +1,8 @@
 package com.project.fraudsystem.rag.service;
 
+import com.project.fraudsystem.rag.dto.RagRequestDTO;
 import com.project.fraudsystem.rag.model.FraudKnowledgeChunk;
+import com.project.fraudsystem.rag.model.FraudModelScore;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,19 +14,31 @@ public class RetrievalDiversificationService {
 
     private static final int TARGET_FINAL_CHUNKS = 3;
 
-    public List<FraudKnowledgeChunk> selectFinalChunks(List<FraudKnowledgeChunk> rerankedChunks) {
+    public List<FraudKnowledgeChunk> selectFinalChunks(RagRequestDTO request,
+                                                       FraudModelScore fraudModelScore,
+                                                       List<FraudKnowledgeChunk> rerankedChunks) {
         List<FraudKnowledgeChunk> remaining = new ArrayList<>(rerankedChunks);
         List<FraudKnowledgeChunk> selected = new ArrayList<>();
 
-        addFirstMatching(selected, remaining, KnowledgeBucket.PRIMARY);
-        addFirstMatching(selected, remaining, KnowledgeBucket.CONTRAST);
-        addFirstMatching(selected, remaining, KnowledgeBucket.GUIDANCE);
+        for (KnowledgeBucket bucket : preferredBucketOrder(request, fraudModelScore)) {
+            addFirstMatching(selected, remaining, bucket);
+        }
 
         while (selected.size() < TARGET_FINAL_CHUNKS && !remaining.isEmpty()) {
             selected.add(remaining.removeFirst());
         }
 
         return selected;
+    }
+
+    private List<KnowledgeBucket> preferredBucketOrder(RagRequestDTO request, FraudModelScore fraudModelScore) {
+        if (isClearlyLowRisk(request, fraudModelScore)) {
+            return List.of(KnowledgeBucket.CONTRAST, KnowledgeBucket.GUIDANCE, KnowledgeBucket.PRIMARY);
+        }
+        if (isBorderlineRisk(fraudModelScore)) {
+            return List.of(KnowledgeBucket.CONTRAST, KnowledgeBucket.PRIMARY, KnowledgeBucket.GUIDANCE);
+        }
+        return List.of(KnowledgeBucket.PRIMARY, KnowledgeBucket.GUIDANCE, KnowledgeBucket.CONTRAST);
     }
 
     private void addFirstMatching(List<FraudKnowledgeChunk> selected,
@@ -42,17 +56,18 @@ public class RetrievalDiversificationService {
 
     private KnowledgeBucket classify(FraudKnowledgeChunk chunk) {
         String category = normalize(chunk.getCategory());
-        if (isPrimaryCategory(category)) {
-            return KnowledgeBucket.PRIMARY;
-        }
-        if (isContrastCategory(category)) {
-            return KnowledgeBucket.CONTRAST;
-        }
+        String riskLevel = normalize(chunk.getRiskLevel());
+        String text = normalize(chunk.getTitle()) + " " + normalize(chunk.getContent());
+
         if ("review_guidance".equals(category)) {
             return KnowledgeBucket.GUIDANCE;
         }
-
-        String text = normalize(chunk.getTitle()) + " " + normalize(chunk.getContent());
+        if ("low".equals(riskLevel) || isContrastCategory(category)) {
+            return KnowledgeBucket.CONTRAST;
+        }
+        if (isPrimaryCategory(category)) {
+            return KnowledgeBucket.PRIMARY;
+        }
         if (containsAny(text, "review", "guidance", "allow", "block", "otp", "escalation")) {
             return KnowledgeBucket.GUIDANCE;
         }
@@ -60,6 +75,27 @@ public class RetrievalDiversificationService {
             return KnowledgeBucket.CONTRAST;
         }
         return KnowledgeBucket.PRIMARY;
+    }
+
+    private boolean isClearlyLowRisk(RagRequestDTO request, FraudModelScore fraudModelScore) {
+        if (fraudModelScore == null || fraudModelScore.getFraudScore() == null || fraudModelScore.getFraudThreshold() == null) {
+            return false;
+        }
+        boolean stableRequest = !request.isNewDevice()
+                && !request.isInternational()
+                && request.getTransactionsLast24h() <= 2
+                && request.getAmount() <= 150.0
+                && request.getAccountAgeDays() >= 180;
+        return stableRequest && fraudModelScore.getFraudScore() < (fraudModelScore.getFraudThreshold() - 0.05);
+    }
+
+    private boolean isBorderlineRisk(FraudModelScore fraudModelScore) {
+        if (fraudModelScore == null || fraudModelScore.getFraudScore() == null || fraudModelScore.getFraudThreshold() == null) {
+            return false;
+        }
+        double score = fraudModelScore.getFraudScore();
+        double threshold = fraudModelScore.getFraudThreshold();
+        return score < threshold + 0.10;
     }
 
     private boolean isPrimaryCategory(String category) {

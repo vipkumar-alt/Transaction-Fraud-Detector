@@ -14,6 +14,7 @@ public class RagResponseDTO {
     private String explanation;
     private String riskLevel;
     private String recommendedAction;
+    private Long latencyMs;
 
     public String getQuery() {
         return query;
@@ -93,5 +94,13 @@ public class RagResponseDTO {
 
     public void setRecommendedAction(String recommendedAction) {
         this.recommendedAction = recommendedAction;
+    }
+
+    public Long getLatencyMs() {
+        return latencyMs;
+    }
+
+    public void setLatencyMs(Long latencyMs) {
+        this.latencyMs = latencyMs;
     }
 }

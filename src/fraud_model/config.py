@@ -26,6 +26,7 @@ class TrainConfig:
     train_catboost: bool
     primary_metric: str
     threshold_strategy: str
+    inference_threshold_floor: float
 
 
 def load_config(config_path: str | Path) -> TrainConfig:
@@ -58,4 +59,5 @@ def load_config(config_path: str | Path) -> TrainConfig:
         train_catboost=bool(models["train_catboost"]),
         primary_metric=str(selection["primary_metric"]),
         threshold_strategy=str(selection["threshold_strategy"]),
+        inference_threshold_floor=float(selection.get("inference_threshold_floor", 0.0)),
     )

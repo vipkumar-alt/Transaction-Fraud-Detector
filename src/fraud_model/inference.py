@@ -40,7 +40,7 @@ def load_scoring_bundle(config: TrainConfig) -> ScoringBundle:
     if not metadata.get("feature_columns"):
         raise ValueError(f"Missing 'feature_columns' in {metadata_path}")
 
-    threshold = _load_threshold(config.artifacts_dir, metadata, model_name)
+    threshold = _load_threshold(config, metadata, model_name)
 
     if model_name == "catboost":
         model_path = config.artifacts_dir / "best_model_catboost.cbm"
@@ -69,7 +69,8 @@ def load_scoring_bundle(config: TrainConfig) -> ScoringBundle:
 def score_transaction(payload: Dict[str, Any], config: TrainConfig) -> Dict[str, Any]:
     bundle = load_scoring_bundle(config)
     features = build_feature_frame(payload, bundle)
-    fraud_score = predict_score(features, bundle)
+    raw_fraud_score = predict_score(features, bundle)
+    fraud_score = calibrate_score(raw_fraud_score, payload)
 
     return {
         "modelName": bundle.model_name,
@@ -146,19 +147,86 @@ def predict_score(feature_frame: pd.DataFrame, bundle: ScoringBundle) -> float:
     return float(probabilities[0])
 
 
-def _load_threshold(artifacts_dir: Path, metadata: Dict[str, Any], model_name: str) -> float:
+def calibrate_score(raw_score: float, payload: Dict[str, Any]) -> float:
+    contextual_risk = estimate_contextual_risk(payload)
+    calibrated = (0.55 * raw_score) + (0.45 * contextual_risk)
+    return float(min(max(calibrated, 0.0), 1.0))
+
+
+def estimate_contextual_risk(payload: Dict[str, Any]) -> float:
+    amount = _optional_float(payload.get("amount") if payload.get("amount") is not None else payload.get("amt"), 0.0) or 0.0
+    account_age_days = _safe_int(payload.get("accountAgeDays"))
+    transactions_last_24h = _safe_int(payload.get("transactionsLast24h"))
+    merchant_category = (_optional_text(payload.get("merchantCategory") or payload.get("category")) or "").lower()
+    new_device = bool(payload.get("newDevice"))
+    international = bool(payload.get("international"))
+
+    risk = 0.30
+
+    if new_device:
+        risk += 0.15
+    else:
+        risk -= 0.10
+
+    if international:
+        risk += 0.18
+    else:
+        risk -= 0.08
+
+    if transactions_last_24h >= 6:
+        risk += 0.12
+    elif transactions_last_24h >= 3:
+        risk += 0.06
+    else:
+        risk -= 0.08
+
+    if amount >= 500.0:
+        risk += 0.10
+    elif amount >= 250.0:
+        risk += 0.05
+    elif amount <= 75.0:
+        risk -= 0.10
+
+    if account_age_days < 60:
+        risk += 0.08
+    elif account_age_days < 180:
+        risk += 0.04
+    elif account_age_days >= 365:
+        risk -= 0.10
+
+    if merchant_category in {"misc_net", "shopping_net"}:
+        risk += 0.06
+    elif merchant_category in {"entertainment"}:
+        risk += 0.02
+    elif merchant_category in {"grocery_pos", "gas_transport", "food_dining", "health_fitness", "shopping_pos"}:
+        risk -= 0.08
+
+    return float(min(max(risk, 0.02), 0.98))
+
+
+def _load_threshold(config: TrainConfig, metadata: Dict[str, Any], model_name: str) -> float:
     threshold = metadata.get("best_threshold")
     if threshold is not None:
-        return float(threshold)
+        return _apply_inference_threshold_floor(float(threshold), metadata, config.inference_threshold_floor)
 
-    metrics_path = artifacts_dir / "all_model_metrics.json"
+    metrics_path = config.artifacts_dir / "all_model_metrics.json"
     if metrics_path.exists():
         metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
         model_metrics = metrics.get(model_name, {})
         if "threshold" in model_metrics:
-            return float(model_metrics["threshold"])
+            return _apply_inference_threshold_floor(
+                float(model_metrics["threshold"]),
+                metadata,
+                config.inference_threshold_floor
+            )
 
-    return 0.5
+    return _apply_inference_threshold_floor(0.5, metadata, config.inference_threshold_floor)
+
+
+def _apply_inference_threshold_floor(threshold: float, metadata: Dict[str, Any], configured_floor: float) -> float:
+    metadata_floor = metadata.get("inference_threshold_floor")
+    effective_floor = configured_floor if metadata_floor is None else max(float(metadata_floor), configured_floor)
+    return float(max(float(threshold), float(effective_floor)))
 
 
 def _apply_rare_category_mapping(frame: pd.DataFrame, rare_mapping: Dict[str, List[str]]) -> None:
@@ -208,3 +276,12 @@ def _optional_float(value: Any, default: float | None = None) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def _safe_int(value: Any) -> int:
+    if value is None or value == "":
+        return 0
+    try:
+        return max(int(value), 0)
+    except (TypeError, ValueError):
+        return 0

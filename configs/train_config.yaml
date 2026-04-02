@@ -25,4 +25,5 @@ models:
 
 selection:
   primary_metric: holdout_pr_auc
-  threshold_strategy: f2
+  threshold_strategy: precision_balanced
+  inference_threshold_floor: 0.55

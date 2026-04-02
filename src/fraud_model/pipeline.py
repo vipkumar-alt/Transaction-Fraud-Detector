@@ -8,7 +8,7 @@ import pandas as pd
 
 from .config import TrainConfig
 from .data_loading import load_raw_datasets
-from .evaluation import choose_threshold_by_f2, compute_metrics
+from .evaluation import choose_threshold, compute_metrics
 from .features import add_behavioral_features, build_feature_lists
 from .models import (
     make_lgbm_pipeline,
@@ -89,7 +89,7 @@ def run_training(config: TrainConfig) -> None:
     if config.train_logistic_regression:
         model = make_logreg_pipeline(categorical_cols, numeric_cols, class_weight)
         model, valid_proba, holdout_proba = train_pipeline_model(model, X_train, y_train, X_valid, X_holdout)
-        threshold, _ = choose_threshold_by_f2(y_valid, valid_proba)
+        threshold, _ = choose_threshold(y_valid, valid_proba, config.threshold_strategy)
         models["logistic_regression"] = {
             "model": model,
             "valid_metrics": compute_metrics(y_valid, valid_proba, threshold),
@@ -100,7 +100,7 @@ def run_training(config: TrainConfig) -> None:
     if config.train_random_forest:
         model = make_rf_pipeline(categorical_cols, numeric_cols, class_weight)
         model, valid_proba, holdout_proba = train_pipeline_model(model, X_train, y_train, X_valid, X_holdout)
-        threshold, _ = choose_threshold_by_f2(y_valid, valid_proba)
+        threshold, _ = choose_threshold(y_valid, valid_proba, config.threshold_strategy)
         models["random_forest"] = {
             "model": model,
             "valid_metrics": compute_metrics(y_valid, valid_proba, threshold),
@@ -111,7 +111,7 @@ def run_training(config: TrainConfig) -> None:
     if config.train_xgboost:
         model = make_xgb_pipeline(categorical_cols, numeric_cols, scale_pos_weight)
         model, valid_proba, holdout_proba = train_pipeline_model(model, X_train, y_train, X_valid, X_holdout)
-        threshold, _ = choose_threshold_by_f2(y_valid, valid_proba)
+        threshold, _ = choose_threshold(y_valid, valid_proba, config.threshold_strategy)
         models["xgboost"] = {
             "model": model,
             "valid_metrics": compute_metrics(y_valid, valid_proba, threshold),
@@ -122,7 +122,7 @@ def run_training(config: TrainConfig) -> None:
     if config.train_lightgbm:
         model = make_lgbm_pipeline(categorical_cols, numeric_cols, scale_pos_weight)
         model, valid_proba, holdout_proba = train_pipeline_model(model, X_train, y_train, X_valid, X_holdout)
-        threshold, _ = choose_threshold_by_f2(y_valid, valid_proba)
+        threshold, _ = choose_threshold(y_valid, valid_proba, config.threshold_strategy)
         models["lightgbm"] = {
             "model": model,
             "valid_metrics": compute_metrics(y_valid, valid_proba, threshold),
@@ -134,7 +134,7 @@ def run_training(config: TrainConfig) -> None:
         model, valid_proba, holdout_proba = train_catboost(
             X_train, y_train, X_valid, y_valid, X_holdout, categorical_cols, scale_pos_weight
         )
-        threshold, _ = choose_threshold_by_f2(y_valid, valid_proba)
+        threshold, _ = choose_threshold(y_valid, valid_proba, config.threshold_strategy)
         models["catboost"] = {
             "model": model,
             "valid_metrics": compute_metrics(y_valid, valid_proba, threshold),
@@ -183,6 +183,8 @@ def run_training(config: TrainConfig) -> None:
     metadata = {
         "best_model": best_name,
         "best_threshold": best_obj["threshold"],
+        "threshold_strategy": config.threshold_strategy,
+        "inference_threshold_floor": config.inference_threshold_floor,
         "feature_columns": feature_cols,
         "categorical_columns": categorical_cols,
         "numeric_columns": numeric_cols,

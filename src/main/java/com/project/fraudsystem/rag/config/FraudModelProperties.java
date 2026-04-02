@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class FraudModelProperties {
 
     private String pythonExecutable = ".venv/bin/python";
-    private String scoringScript = "scripts/score_transaction.py";
+    private String scoringScript = "scripts/inference/score_transaction.py";
     private String trainingConfig = "configs/train_config.yaml";
     private long timeoutMillis = 15000L;
 

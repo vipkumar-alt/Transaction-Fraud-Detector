@@ -10,7 +10,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
@@ -33,6 +33,7 @@ KEY_COLUMNS = [
 
 
 def prepare_datasets(config_path: str | Path):
+    config_path = (PROJECT_ROOT / config_path).resolve() if not Path(config_path).is_absolute() else Path(config_path)
     config = load_config(config_path)
     df = load_raw_datasets(config.raw_dir, config.train_file, config.holdout_file)
     df = basic_preprocess(df, create_amount_bands=config.create_amount_bands)
@@ -80,6 +81,7 @@ def prepare_datasets(config_path: str | Path):
 
 
 def load_best_model(config_path: str | Path):
+    config_path = (PROJECT_ROOT / config_path).resolve() if not Path(config_path).is_absolute() else Path(config_path)
     config = load_config(config_path)
     metadata_path = config.artifacts_dir / "training_metadata.json"
     if not metadata_path.exists():
