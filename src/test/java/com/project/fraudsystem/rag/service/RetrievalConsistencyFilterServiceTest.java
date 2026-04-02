@@ -26,7 +26,7 @@ class RetrievalConsistencyFilterServiceTest {
         FraudKnowledgeChunk domesticChunk = chunk(
                 2,
                 "Domestic card velocity",
-                "Domestic rapid transaction behavior",
+                "Domestic routine transaction behavior",
                 0.18
         );
 

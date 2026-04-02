@@ -25,13 +25,16 @@ class QueryBuilderServiceTest {
 
         assertThat(query).isEqualTo(
                 "Transaction amount is 220. "
+                        + "This is a moderate-value transaction. "
                         + "Merchant category is misc_net. "
                         + "Device type is web. "
                         + "The transaction is from a new device. "
                         + "The transaction is domestic, not international. "
                         + "Transaction time is 19:45 in the evening. "
                         + "Account age is 60 days. "
-                        + "The account made 6 transactions in the last 24 hours."
+                        + "The account is relatively new. "
+                        + "The account made 6 transactions in the last 24 hours. "
+                        + "Recent transaction velocity is elevated."
         );
     }
 
@@ -51,13 +54,16 @@ class QueryBuilderServiceTest {
 
         assertThat(query).isEqualTo(
                 "Transaction amount is 8500. "
+                        + "This is a high-value transaction. "
                         + "Merchant category is shopping_net. "
                         + "Device type is mobile. "
                         + "The transaction is from a new device. "
                         + "The transaction is international. "
                         + "Transaction time is 02:15 at night. "
                         + "Account age is 10 days. "
-                        + "The account made 12 transactions in the last 24 hours."
+                        + "The account is relatively new. "
+                        + "The account made 12 transactions in the last 24 hours. "
+                        + "Recent transaction velocity is elevated."
         );
     }
 }

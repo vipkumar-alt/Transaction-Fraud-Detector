@@ -367,6 +367,26 @@ The frontend proxies `/api/*` calls to the backend.
   - `inference_threshold_floor: 0.55`
 - if you retrain, new metadata and model artifacts will be written into `artifacts/`
 
+## Project Contributions
+
+- Mohit
+  - led the RAG implementation across query building, embedding-based retrieval, reranking, diversification, and LLM explanation orchestration
+  - integrated the RAG flow with the ML scorer into the final hybrid backend pipeline
+  - drove the Phase-1 branch integration work that combined backend, frontend, and audit pieces into a working application state
+  - added frontend analysis UX pieces, including real-time step timing visibility and the post-analysis popup summary
+  - contributed to project-level cleanup such as structure alignment, analytics UI work, and README/documentation updates
+  
+- Vipul
+  - implemented audit logging and the audit-log backend/frontend flow
+  - integrated the RAG pipeline outputs with the audit logging flow so fraud-analysis results are persisted for review
+  - contributed the audit logs page and related frontend integration with backend audit responses
+  - helped shape the overall frontend experience that the integrated branch now builds on
+  - 
+- Naman
+  - implemented the ML scoring side based on the fraud dataset and trained-model artifacts
+  - contributed the model pipeline and fraud score generation used by the backend integration
+
+
 ## Quality / Maintenance Notes
 
 Current codebase priorities after Phase-1:

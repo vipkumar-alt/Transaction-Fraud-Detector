@@ -1,5 +1,6 @@
 package com.project.fraudsystem.rag.service;
 
+import com.project.fraudsystem.audit.service.AuditLogService;
 import com.project.fraudsystem.rag.dto.RagRequestDTO;
 import com.project.fraudsystem.rag.dto.RagResponseDTO;
 import com.project.fraudsystem.rag.model.FraudModelScore;
@@ -28,6 +29,7 @@ class RagServiceTest {
         PromptBuilderService promptBuilderService = mock(PromptBuilderService.class);
         LlmExplanationService llmExplanationService = mock(LlmExplanationService.class);
         LlmResponseParserService llmResponseParserService = mock(LlmResponseParserService.class);
+        AuditLogService auditLogService = mock(AuditLogService.class);
 
         RagService ragService = new RagService(
                 queryBuilderService,
@@ -37,7 +39,8 @@ class RagServiceTest {
                 retrievalDiversificationService,
                 promptBuilderService,
                 llmExplanationService,
-                llmResponseParserService
+                llmResponseParserService,
+                auditLogService
         );
 
         RagRequestDTO request = new RagRequestDTO();
@@ -57,7 +60,7 @@ class RagServiceTest {
         when(fraudModelScoreService.score(request)).thenReturn(fraudModelScore);
         when(vectorSearchService.search("high value")).thenReturn(chunks);
         when(retrievalConsistencyFilterService.rerank(request, chunks)).thenReturn(chunks);
-        when(retrievalDiversificationService.selectFinalChunks(chunks)).thenReturn(chunks);
+        when(retrievalDiversificationService.selectFinalChunks(request, fraudModelScore, chunks)).thenReturn(chunks);
         when(promptBuilderService.buildPrompt(request, "high value", chunks, fraudModelScore)).thenReturn("prompt");
         when(llmExplanationService.generateResponse("prompt")).thenReturn("""
                 Explanation: suspicious transaction
@@ -92,5 +95,6 @@ class RagServiceTest {
                 RiskLevel: HIGH
                 RecommendedAction: BLOCK
                 """), any(RagResponseDTO.class));
+        verify(auditLogService).logSuccess(eq(request), any(RagResponseDTO.class), eq(0.88), any(), any(), any(Long.class));
     }
 }
